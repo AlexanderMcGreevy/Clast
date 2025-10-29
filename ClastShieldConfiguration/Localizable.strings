@@ -1,0 +1,38 @@
+/*
+  Localizable.strings - English Base
+  ClastShieldConfiguration
+
+  Localization strings for the shield screen.
+*/
+
+/* Shield title when app is blocked */
+"shield.title.blocked" = "Clast Focus Active";
+
+/* Shield subtitle for blocked apps */
+"shield.subtitle.app" = "Stay focused on your session";
+
+/* Shield subtitle for blocked websites */
+"shield.subtitle.web" = "This website is blocked during your session";
+
+/* Primary button - opens Clast app */
+"shield.button.primary" = "Open Clast";
+
+/* Secondary button - closes shield */
+"shield.button.secondary" = "Back";
+
+/* Encouragement messages (shown randomly) */
+"shield.encouragement.1" = "You're doing great! Keep going.";
+"shield.encouragement.2" = "Stay strong and focused.";
+"shield.encouragement.3" = "You've got this!";
+"shield.encouragement.4" = "Almost there. Don't give up now.";
+"shield.encouragement.5" = "Your focus is your superpower.";
+
+/* Accessibility labels */
+"shield.accessibility.icon" = "Clast flame icon";
+"shield.accessibility.primaryButton" = "Open Clast app to view your focus session";
+"shield.accessibility.secondaryButton" = "Go back to previous screen";
+
+/* Error states */
+"shield.error.noSession" = "No active focus session";
+"shield.error.noPermission" = "Screen Time permission required";
+"shield.error.generic" = "Unable to load shield information";

@@ -1,9 +1,11 @@
 import SwiftUI
 
 struct SettingsView: View {
+    @StateObject private var selectionStore = FamilyActivitySelectionStore.shared
     @State private var notificationsEnabled = true
     @State private var strictMode = false
     @State private var defaultDuration = 25
+    @State private var isNavigatingToFocusSettings = false
 
     var body: some View {
         NavigationStack {
@@ -12,6 +14,32 @@ struct SettingsView: View {
                     .ignoresSafeArea()
 
                 Form {
+                    Section {
+                        Button {
+                            isNavigatingToFocusSettings = true
+                        } label: {
+                            HStack {
+                                Label("Blocked Apps", systemImage: "app.badge.fill")
+                                    .foregroundColor(.white)
+                                Spacer()
+                                if selectionStore.hasAnySelectedApps {
+                                    Text("\(selectionStore.selectedItemCount) selected")
+                                        .foregroundColor(.white.opacity(0.5))
+                                        .font(.system(size: 14))
+                                } else {
+                                    Text("Not configured")
+                                        .foregroundColor(.orange)
+                                        .font(.system(size: 14))
+                                }
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.white.opacity(0.3))
+                                    .font(.system(size: 14))
+                            }
+                        }
+                    } header: {
+                        Text("Focus Mode")
+                    }
+
                     Section {
                         Toggle("Enable Notifications", isOn: $notificationsEnabled)
                         Toggle("Strict Mode", isOn: $strictMode)
@@ -51,11 +79,38 @@ struct SettingsView: View {
                         }
                         .foregroundColor(.red)
                     }
+
+                    #if DEBUG
+                    Section {
+                        Button {
+                            ShieldDiagnostics.shared.runDiagnostics()
+                        } label: {
+                            Label("Run Shield Diagnostics", systemImage: "stethoscope")
+                                .foregroundColor(.white)
+                        }
+
+                        Button {
+                            ShieldDiagnostics.shared.printActiveShields()
+                        } label: {
+                            Label("Check Active Shields", systemImage: "shield.fill")
+                                .foregroundColor(.white)
+                        }
+                    } header: {
+                        Text("Debug Tools")
+                    } footer: {
+                        Text("Check Xcode console for diagnostic output")
+                            .font(.caption)
+                    }
+                    #endif
                 }
                 .scrollContentBackground(.hidden)
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.large)
+            .navigationDestination(isPresented: $isNavigatingToFocusSettings) {
+                FocusSettingsView()
+                    .environmentObject(selectionStore)
+            }
         }
     }
 }

@@ -3,6 +3,7 @@ import SwiftUI
 struct SessionCompleteView: View {
     let duration: Int // in seconds
     let breaksTaken: Int
+    let completed: Bool
 
     @EnvironmentObject var sessionManager: SessionManager
     @Environment(\.dismiss) private var dismiss
@@ -26,24 +27,36 @@ struct SessionCompleteView: View {
             VStack(spacing: 40) {
                 Spacer()
 
-                // Success Icon
+                // Success/Failure Icon
                 VStack(spacing: 24) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 100))
-                        .foregroundStyle(
-                            .linearGradient(
-                                colors: [.green, .mint],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
+                    if completed {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 100))
+                            .foregroundStyle(
+                                .linearGradient(
+                                    colors: [.green, .mint],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
                             )
-                        )
+                    } else {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 100))
+                            .foregroundStyle(
+                                .linearGradient(
+                                    colors: [.red, .orange],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                    }
 
                     VStack(spacing: 12) {
-                        Text("Session Complete!")
+                        Text(completed ? "Session Complete!" : "Session Incomplete")
                             .font(.system(size: 40, weight: .bold, design: .rounded))
                             .foregroundColor(.white)
 
-                        Text("Great work staying focused.")
+                        Text(completed ? "Great work staying focused." : "Better luck next time.")
                             .font(.system(size: 18, weight: .medium))
                             .foregroundColor(.white.opacity(0.7))
                             .multilineTextAlignment(.center)
@@ -91,12 +104,14 @@ struct SessionCompleteView: View {
         }
         .navigationBarBackButtonHidden(true)
         .onAppear {
-            // Log the session
-            sessionManager.logSession(
-                duration: duration,
-                completed: true,
-                breaksTaken: breaksTaken
-            )
+            // Log the session only if it was completed (early termination already logged)
+            if completed {
+                sessionManager.logSession(
+                    duration: duration,
+                    completed: true,
+                    breaksTaken: breaksTaken
+                )
+            }
         }
     }
 }
@@ -127,7 +142,7 @@ struct StatRow: View {
 }
 
 #Preview {
-    SessionCompleteView(duration: 1500, breaksTaken: 2)
+    SessionCompleteView(duration: 1500, breaksTaken: 2, completed: true)
         .environmentObject(SessionManager())
         .preferredColorScheme(.dark)
 }

@@ -4,6 +4,7 @@ struct ProofGateView: View {
     let timeRemaining: Int
     let onReturnToSession: () -> Void
     let onBreakTaken: () -> Void
+    let onEndEarly: () -> Void
 
     @Environment(\.dismiss) private var dismiss
     @State private var proofText: String = ""
@@ -156,13 +157,14 @@ struct ProofGateView: View {
             BreakUnlockedView(
                 timeRemaining: timeRemaining,
                 onReturnToSession: onReturnToSession,
-                onBreakTaken: onBreakTaken
+                onBreakTaken: onBreakTaken,
+                onEndEarly: onEndEarly
             )
         }
     }
 }
 
 #Preview {
-    ProofGateView(timeRemaining: 900, onReturnToSession: {}, onBreakTaken: {})
+    ProofGateView(timeRemaining: 900, onReturnToSession: {}, onBreakTaken: {}, onEndEarly: {})
         .preferredColorScheme(.dark)
 }

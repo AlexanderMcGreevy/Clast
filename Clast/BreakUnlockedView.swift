@@ -4,13 +4,16 @@ struct BreakUnlockedView: View {
     let timeRemaining: Int?
     let onReturnToSession: (() -> Void)?
     let onBreakTaken: (() -> Void)?
+    let onEndEarly: (() -> Void)?
 
     @Environment(\.dismiss) private var dismiss
+    @State private var showEndSessionAlert = false
 
-    init(timeRemaining: Int? = nil, onReturnToSession: (() -> Void)? = nil, onBreakTaken: (() -> Void)? = nil) {
+    init(timeRemaining: Int? = nil, onReturnToSession: (() -> Void)? = nil, onBreakTaken: (() -> Void)? = nil, onEndEarly: (() -> Void)? = nil) {
         self.timeRemaining = timeRemaining
         self.onReturnToSession = onReturnToSession
         self.onBreakTaken = onBreakTaken
+        self.onEndEarly = onEndEarly
     }
 
     var body: some View {
@@ -90,8 +93,7 @@ struct BreakUnlockedView: View {
                     }
 
                     Button {
-                        // End session early - go back to home
-                        dismiss()
+                        showEndSessionAlert = true
                     } label: {
                         Text("End Session Early")
                             .font(.system(size: 20, weight: .bold))
@@ -110,6 +112,14 @@ struct BreakUnlockedView: View {
             }
         }
         .navigationBarBackButtonHidden(timeRemaining == nil)
+        .alert("End Session Early?", isPresented: $showEndSessionAlert) {
+            Button("Cancel", role: .cancel) {}
+            Button("End Session", role: .destructive) {
+                onEndEarly?()
+            }
+        } message: {
+            Text("This session will be marked as incomplete and added to your history.")
+        }
         .toolbar {
             if let onReturnToSession = onReturnToSession, timeRemaining != nil {
                 ToolbarItem(placement: .navigationBarLeading) {

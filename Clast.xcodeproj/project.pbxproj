@@ -6,6 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		33939A0B2EB281C80070C29C /* ManagedSettings.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 33939A0A2EB281C80070C29C /* ManagedSettings.framework */; };
+		33939A0D2EB281C80070C29C /* ManagedSettingsUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 33939A0C2EB281C80070C29C /* ManagedSettingsUI.framework */; };
+		33939A152EB281C80070C29C /* ClastShieldConfiguration.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 33939A082EB281C80070C29C /* ClastShieldConfiguration.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		33418D222EAD794000F2030F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -21,12 +27,36 @@
 			remoteGlobalIDString = 33418D132EAD793C00F2030F;
 			remoteInfo = Clast;
 		};
+		33939A132EB281C80070C29C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 33418D0C2EAD793C00F2030F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 33939A072EB281C80070C29C;
+			remoteInfo = ClastShieldConfiguration;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		33939A1A2EB281C80070C29C /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				33939A152EB281C80070C29C /* ClastShieldConfiguration.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		33418D142EAD793C00F2030F /* Clast.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Clast.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		33418D212EAD794000F2030F /* ClastTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ClastTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		33418D2B2EAD794000F2030F /* ClastUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ClastUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		33939A082EB281C80070C29C /* ClastShieldConfiguration.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ClastShieldConfiguration.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		33939A0A2EB281C80070C29C /* ManagedSettings.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ManagedSettings.framework; path = System/Library/Frameworks/ManagedSettings.framework; sourceTree = SDKROOT; };
+		33939A0C2EB281C80070C29C /* ManagedSettingsUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ManagedSettingsUI.framework; path = System/Library/Frameworks/ManagedSettingsUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -43,6 +73,16 @@
 		33418D2E2EAD794000F2030F /* ClastUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = ClastUITests;
+			sourceTree = "<group>";
+		};
+		339399FF2EB27E0F0070C29C /* ClastShieldConfiguration */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ClastShieldConfiguration;
+			sourceTree = "<group>";
+		};
+		33939A0E2EB281C80070C29C /* ClastShieldConfiguration */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ClastShieldConfiguration;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -69,6 +109,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		33939A052EB281C80070C29C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				33939A0B2EB281C80070C29C /* ManagedSettings.framework in Frameworks */,
+				33939A0D2EB281C80070C29C /* ManagedSettingsUI.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -78,7 +127,10 @@
 				33418D162EAD793C00F2030F /* Clast */,
 				33418D242EAD794000F2030F /* ClastTests */,
 				33418D2E2EAD794000F2030F /* ClastUITests */,
+				33939A0E2EB281C80070C29C /* ClastShieldConfiguration */,
+				33939A092EB281C80070C29C /* Frameworks */,
 				33418D152EAD793C00F2030F /* Products */,
+				339399FF2EB27E0F0070C29C /* ClastShieldConfiguration */,
 			);
 			sourceTree = "<group>";
 		};
@@ -88,8 +140,18 @@
 				33418D142EAD793C00F2030F /* Clast.app */,
 				33418D212EAD794000F2030F /* ClastTests.xctest */,
 				33418D2B2EAD794000F2030F /* ClastUITests.xctest */,
+				33939A082EB281C80070C29C /* ClastShieldConfiguration.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		33939A092EB281C80070C29C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				33939A0A2EB281C80070C29C /* ManagedSettings.framework */,
+				33939A0C2EB281C80070C29C /* ManagedSettingsUI.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -102,13 +164,16 @@
 				33418D102EAD793C00F2030F /* Sources */,
 				33418D112EAD793C00F2030F /* Frameworks */,
 				33418D122EAD793C00F2030F /* Resources */,
+				33939A1A2EB281C80070C29C /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				33939A142EB281C80070C29C /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				33418D162EAD793C00F2030F /* Clast */,
+				339399FF2EB27E0F0070C29C /* ClastShieldConfiguration */,
 			);
 			name = Clast;
 			packageProductDependencies = (
@@ -163,6 +228,28 @@
 			productReference = 33418D2B2EAD794000F2030F /* ClastUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		33939A072EB281C80070C29C /* ClastShieldConfiguration */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 33939A172EB281C80070C29C /* Build configuration list for PBXNativeTarget "ClastShieldConfiguration" */;
+			buildPhases = (
+				33939A042EB281C80070C29C /* Sources */,
+				33939A052EB281C80070C29C /* Frameworks */,
+				33939A062EB281C80070C29C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				33939A0E2EB281C80070C29C /* ClastShieldConfiguration */,
+			);
+			name = ClastShieldConfiguration;
+			packageProductDependencies = (
+			);
+			productName = ClastShieldConfiguration;
+			productReference = 33939A082EB281C80070C29C /* ClastShieldConfiguration.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -184,6 +271,9 @@
 						CreatedOnToolsVersion = 26.0.1;
 						TestTargetID = 33418D132EAD793C00F2030F;
 					};
+					33939A072EB281C80070C29C = {
+						CreatedOnToolsVersion = 26.0.1;
+					};
 				};
 			};
 			buildConfigurationList = 33418D0F2EAD793C00F2030F /* Build configuration list for PBXProject "Clast" */;
@@ -203,6 +293,7 @@
 				33418D132EAD793C00F2030F /* Clast */,
 				33418D202EAD794000F2030F /* ClastTests */,
 				33418D2A2EAD794000F2030F /* ClastUITests */,
+				33939A072EB281C80070C29C /* ClastShieldConfiguration */,
 			);
 		};
 /* End PBXProject section */
@@ -223,6 +314,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		33418D292EAD794000F2030F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		33939A062EB281C80070C29C /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -253,6 +351,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		33939A042EB281C80070C29C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -265,6 +370,11 @@
 			isa = PBXTargetDependency;
 			target = 33418D132EAD793C00F2030F /* Clast */;
 			targetProxy = 33418D2C2EAD794000F2030F /* PBXContainerItemProxy */;
+		};
+		33939A142EB281C80070C29C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 33939A072EB281C80070C29C /* ClastShieldConfiguration */;
+			targetProxy = 33939A132EB281C80070C29C /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -395,6 +505,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Clast/Clast.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = Z87CXCTTK6;
@@ -427,6 +538,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Clast/Clast.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = Z87CXCTTK6;
@@ -538,6 +650,64 @@
 			};
 			name = Release;
 		};
+		33939A182EB281C80070C29C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ClastShieldConfiguration/ClastShieldConfiguration.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Z87CXCTTK6;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ClastShieldConfiguration/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ClastShieldConfiguration;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.GroovyGears.Clast.ClastShieldConfiguration;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		33939A192EB281C80070C29C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ClastShieldConfiguration/ClastShieldConfiguration.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Z87CXCTTK6;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ClastShieldConfiguration/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ClastShieldConfiguration;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.GroovyGears.Clast.ClastShieldConfiguration;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -573,6 +743,15 @@
 			buildConfigurations = (
 				33418D3C2EAD794000F2030F /* Debug */,
 				33418D3D2EAD794000F2030F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		33939A172EB281C80070C29C /* Build configuration list for PBXNativeTarget "ClastShieldConfiguration" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				33939A182EB281C80070C29C /* Debug */,
+				33939A192EB281C80070C29C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
