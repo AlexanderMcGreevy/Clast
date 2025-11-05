@@ -113,6 +113,23 @@ struct RunningSessionView: View {
                                     .stroke(.red.opacity(0.5), lineWidth: 1)
                             )
                     }
+
+                    #if DEBUG
+                    Button {
+                        ShieldDiagnostics.shared.runDiagnostics()
+                        ShieldDiagnostics.shared.printActiveShields()
+                    } label: {
+                        Text("🔍 Run Shield Diagnostics")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.yellow.opacity(0.8))
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 40)
+                            .background(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .stroke(.yellow.opacity(0.5), lineWidth: 1)
+                            )
+                    }
+                    #endif
                 }
                 .padding(.horizontal, 40)
 

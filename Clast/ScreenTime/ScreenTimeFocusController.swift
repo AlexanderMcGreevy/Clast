@@ -87,11 +87,18 @@ class ScreenTimeFocusController: ObservableObject {
     private func applyShields() throws {
         let selection = selectionStore.selection
 
+        print("🛡️ [ScreenTimeFocusController] Applying shields...")
+        print("   - Applications: \(selection.applicationTokens.count)")
+        print("   - Categories: \(selection.categoryTokens.count)")
+        print("   - Web Domains: \(selection.webDomainTokens.count)")
+
         // Shield selected applications
         store.shield.applications = selection.applicationTokens.isEmpty ? nil : selection.applicationTokens
         store.shield.applicationCategories = selection.categoryTokens.isEmpty ? nil :
             ShieldSettings.ActivityCategoryPolicy.specific(selection.categoryTokens)
         store.shield.webDomains = selection.webDomainTokens.isEmpty ? nil : selection.webDomainTokens
+
+        print("✓ Shields applied successfully")
     }
 
     private func clearShields() {

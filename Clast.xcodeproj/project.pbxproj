@@ -59,6 +59,27 @@
 		33939A0C2EB281C80070C29C /* ManagedSettingsUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ManagedSettingsUI.framework; path = System/Library/Frameworks/ManagedSettingsUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		331107792EBBF26C00CED2BC /* Exceptions for "ClastShieldConfiguration" folder in "ClastShieldConfiguration" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+				ShieldConfigurationExtension.swift,
+			);
+			target = 33939A072EB281C80070C29C /* ClastShieldConfiguration */;
+		};
+		3311077A2EBBF26C00CED2BC /* Exceptions for "ClastShieldConfiguration" folder in "ClastShieldConfiguration" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+				Localizable.strings,
+				ShieldActionExtension.swift,
+				ShieldAnalytics.swift,
+			);
+			target = 33939A072EB281C80070C29C /* ClastShieldConfiguration */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		33418D162EAD793C00F2030F /* Clast */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
@@ -77,11 +98,17 @@
 		};
 		339399FF2EB27E0F0070C29C /* ClastShieldConfiguration */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				3311077A2EBBF26C00CED2BC /* Exceptions for "ClastShieldConfiguration" folder in "ClastShieldConfiguration" target */,
+			);
 			path = ClastShieldConfiguration;
 			sourceTree = "<group>";
 		};
 		33939A0E2EB281C80070C29C /* ClastShieldConfiguration */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				331107792EBBF26C00CED2BC /* Exceptions for "ClastShieldConfiguration" folder in "ClastShieldConfiguration" target */,
+			);
 			path = ClastShieldConfiguration;
 			sourceTree = "<group>";
 		};
@@ -173,7 +200,6 @@
 			);
 			fileSystemSynchronizedGroups = (
 				33418D162EAD793C00F2030F /* Clast */,
-				339399FF2EB27E0F0070C29C /* ClastShieldConfiguration */,
 			);
 			name = Clast;
 			packageProductDependencies = (
@@ -241,6 +267,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				339399FF2EB27E0F0070C29C /* ClastShieldConfiguration */,
 				33939A0E2EB281C80070C29C /* ClastShieldConfiguration */,
 			);
 			name = ClastShieldConfiguration;
@@ -258,7 +285,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2600;
-				LastUpgradeCheck = 2600;
+				LastUpgradeCheck = 2610;
 				TargetAttributes = {
 					33418D132EAD793C00F2030F = {
 						CreatedOnToolsVersion = 26.0.1;
@@ -438,6 +465,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -495,6 +523,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};

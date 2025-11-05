@@ -49,7 +49,7 @@ class ShieldDiagnostics {
         }
 
         // Check 4: ManagedSettings Store
-        let settingsStore = ManagedSettingsStore()
+        _ = ManagedSettingsStore()
         print("✓ ManagedSettings Store Created")
 
         // Check 5: Focus Controller State
