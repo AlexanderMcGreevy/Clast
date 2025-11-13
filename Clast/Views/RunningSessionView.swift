@@ -5,6 +5,8 @@ struct RunningSessionView: View {
     let minutes: Int
 
     @EnvironmentObject var sessionManager: SessionManager
+    @StateObject private var stateManager = SessionStateManager.shared
+    
     @State private var timeRemaining: Int = 0
     @State private var totalTime: Int = 0
     @State private var isNavigatingToProofGate = false
@@ -17,6 +19,7 @@ struct RunningSessionView: View {
     @State private var showFocusError = false
     @State private var focusErrorMessage = ""
     @State private var showPermissionDeniedAlert = false
+    @State private var showGoalInput = false
 
     var progress: Double {
         guard totalTime > 0 else { return 0 }
@@ -113,23 +116,6 @@ struct RunningSessionView: View {
                                     .stroke(.red.opacity(0.5), lineWidth: 1)
                             )
                     }
-
-                    #if DEBUG
-                    Button {
-                        ShieldDiagnostics.shared.runDiagnostics()
-                        ShieldDiagnostics.shared.printActiveShields()
-                    } label: {
-                        Text("🔍 Run Shield Diagnostics")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.yellow.opacity(0.8))
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 40)
-                            .background(
-                                RoundedRectangle(cornerRadius: 20)
-                                    .stroke(.yellow.opacity(0.5), lineWidth: 1)
-                            )
-                    }
-                    #endif
                 }
                 .padding(.horizontal, 40)
 
@@ -151,54 +137,20 @@ struct RunningSessionView: View {
                 Text(focusErrorMessage)
             }
             .onAppear {
-            // Check if there's an active timer to restore
-            if let activeTimer = sessionManager.activeTimer {
-                // Restore from saved state
-                isRestoredSession = true
-                totalTime = activeTimer.totalDuration
-                breaksTaken = activeTimer.breaksTaken
-
-                if activeTimer.isExpired {
-                    // Timer completed while app was closed
-                    timeRemaining = 0
-                    sessionManager.clearActiveTimer()
-                    isNavigatingToSessionComplete = true
+                // Check if session state exists
+                if stateManager.currentState == nil {
+                    // Show goal input
+                    showGoalInput = true
                 } else {
-                    // Timer still running
-                    timeRemaining = activeTimer.timeRemaining
-                    startTimer()
+                    // State exists, proceed with timer
+                    initializeTimer()
                 }
-            } else {
-                // New timer - initialize and save
-                totalTime = (hours * 3600) + (minutes * 60)
-                timeRemaining = totalTime
-
-                // WIRING POINT: Start timer with Screen Time blocking
-                Task {
-                    do {
-                        try await sessionManager.startTimer(duration: totalTime)
-                        startTimer()
-                    } catch let error as FocusError {
-                        // Handle focus errors (permission denied, no apps selected, etc.)
-                        if case .notAuthorized = error {
-                            showPermissionDeniedAlert = true
-                        } else {
-                            focusErrorMessage = error.localizedDescription
-                            showFocusError = true
-                        }
-                        // Note: Timer won't start if focus fails
-                    } catch {
-                        focusErrorMessage = "Failed to start focus session: \(error.localizedDescription)"
-                        showFocusError = true
-                    }
-                }
-            }
         }
         .onDisappear {
             timer?.invalidate()
         }
         .navigationDestination(isPresented: $isNavigatingToProofGate) {
-            ProofGateView(
+            AIProofGateView(
                 timeRemaining: timeRemaining,
                 onReturnToSession: {
                     // Resume timer when returning to session
@@ -220,10 +172,60 @@ struct RunningSessionView: View {
                     completed: !sessionEndedEarly
                 )
             }
+            .sheet(isPresented: $showGoalInput) {
+                SessionGoalInputView(isPresented: $showGoalInput) { goal in
+                    stateManager.startNewSession(goal: goal)
+                    showGoalInput = false
+                    initializeTimer()
+                }
+            }
 
             // Permission denied overlay
             if showPermissionDeniedAlert {
                 PermissionDeniedView(isPresented: $showPermissionDeniedAlert)
+            }
+        }
+    }
+    
+    private func initializeTimer() {
+        // Check if there's an active timer to restore
+        if let activeTimer = sessionManager.activeTimer {
+            // Restore from saved state
+            isRestoredSession = true
+            totalTime = activeTimer.totalDuration
+            breaksTaken = activeTimer.breaksTaken
+
+            if activeTimer.isExpired {
+                // Timer completed while app was closed
+                timeRemaining = 0
+                sessionManager.clearActiveTimer()
+                stateManager.clearState()
+                isNavigatingToSessionComplete = true
+            } else {
+                // Timer still running
+                timeRemaining = activeTimer.timeRemaining
+                startTimer()
+            }
+        } else {
+            // New timer - initialize and save
+            totalTime = (hours * 3600) + (minutes * 60)
+            timeRemaining = totalTime
+
+            Task {
+                do {
+                    try await sessionManager.startTimer(duration: totalTime)
+                    startTimer()
+                } catch let error as FocusError {
+                    if case .notAuthorized = error {
+                        showPermissionDeniedAlert = true
+                    } else {
+                        focusErrorMessage = error.localizedDescription
+                        showFocusError = true
+                    }
+                } catch {
+                    focusErrorMessage = "Failed to start focus session: \(error.localizedDescription)"
+                    showFocusError = true
+                }
             }
         }
     }
@@ -236,6 +238,7 @@ struct RunningSessionView: View {
                 } else {
                     timer?.invalidate()
                     sessionManager.clearActiveTimer()
+                    stateManager.clearState()
                     isNavigatingToSessionComplete = true
                 }
             }
@@ -246,7 +249,7 @@ struct RunningSessionView: View {
         timer?.invalidate()
         sessionEndedEarly = true
         sessionManager.clearActiveTimer()
-        // Log the failed session immediately
+        stateManager.clearState()
         sessionManager.logSession(
             duration: totalTime - timeRemaining,
             completed: false,
@@ -254,10 +257,4 @@ struct RunningSessionView: View {
         )
         isNavigatingToSessionComplete = true
     }
-}
-
-#Preview {
-    RunningSessionView(hours: 0, minutes: 25)
-        .environmentObject(SessionManager())
-        .preferredColorScheme(.dark)
 }
