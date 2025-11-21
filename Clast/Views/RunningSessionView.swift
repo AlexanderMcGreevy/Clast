@@ -195,17 +195,11 @@ struct RunningSessionView: View {
             totalTime = activeTimer.totalDuration
             breaksTaken = activeTimer.breaksTaken
 
-            if activeTimer.isExpired {
-                // Timer completed while app was closed
-                timeRemaining = 0
-                sessionManager.clearActiveTimer()
-                stateManager.clearState()
-                isNavigatingToSessionComplete = true
-            } else {
-                // Timer still running
-                timeRemaining = activeTimer.timeRemaining
-                startTimer()
-            }
+            // Note: If timer expired while app was closed, SessionManager already handled it
+            // and cleared the activeTimer, so we won't reach here.
+            // We only restore if timer is still running
+            timeRemaining = activeTimer.timeRemaining
+            startTimer()
         } else {
             // New timer - initialize and save
             totalTime = (hours * 3600) + (minutes * 60)
@@ -237,8 +231,22 @@ struct RunningSessionView: View {
                     timeRemaining -= 1
                 } else {
                     timer?.invalidate()
+
+                    // Create completed session
+                    let completedSession = SessionData(
+                        duration: totalTime,
+                        completed: true,
+                        breaksTaken: breaksTaken
+                    )
+
+                    // Set as pending completion (will show via ContentView)
+                    sessionManager.pendingCompletionSession = completedSession
+
+                    // Clear active timer and state
                     sessionManager.clearActiveTimer()
                     stateManager.clearState()
+
+                    // Navigate to completion screen
                     isNavigatingToSessionComplete = true
                 }
             }
@@ -248,13 +256,25 @@ struct RunningSessionView: View {
     private func endSessionEarly() {
         timer?.invalidate()
         sessionEndedEarly = true
-        sessionManager.clearActiveTimer()
-        stateManager.clearState()
-        sessionManager.logSession(
+
+        // Create incomplete session
+        let incompleteSession = SessionData(
             duration: totalTime - timeRemaining,
             completed: false,
             breaksTaken: breaksTaken
         )
+
+        // Log immediately (early termination)
+        sessionManager.addSession(incompleteSession)
+
+        // Clear active timer and state
+        sessionManager.clearActiveTimer()
+        stateManager.clearState()
+
+        // Set as pending to show completion screen
+        sessionManager.pendingCompletionSession = incompleteSession
+
+        // Navigate to completion screen
         isNavigatingToSessionComplete = true
     }
 }

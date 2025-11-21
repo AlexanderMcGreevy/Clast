@@ -80,8 +80,17 @@ class FocusController: ObservableObject {
         }
     }
 
+    /// Manually refresh authorization status (call when returning to app)
+    func refreshAuthorizationStatus() {
+        updateAuthorizationStatus()
+    }
+
     private func updateAuthorizationStatus() {
-        authorizationStatus = AuthorizationCenter.shared.authorizationStatus
+        let newStatus = AuthorizationCenter.shared.authorizationStatus
+        if newStatus != authorizationStatus {
+            print("🔐 [FocusController] Authorization status changed: \(authorizationStatus) → \(newStatus)")
+        }
+        authorizationStatus = newStatus
     }
 
     // MARK: - Session Management

@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @StateObject private var selectionStore = FamilyActivitySelectionStore.shared
+    @StateObject private var selectionStore = SelectionStore.shared
     @State private var notificationsEnabled = true
     @State private var strictMode = false
     @State private var defaultDuration = 25
@@ -22,8 +22,8 @@ struct SettingsView: View {
                                 Label("Blocked Apps", systemImage: "app.badge.fill")
                                     .foregroundColor(.white)
                                 Spacer()
-                                if selectionStore.hasAnySelectedApps {
-                                    Text("\(selectionStore.selectedItemCount) selected")
+                                if selectionStore.hasAnySelections {
+                                    Text("\(selectionStore.totalSelectionCount) selected")
                                         .foregroundColor(.white.opacity(0.5))
                                         .font(.system(size: 14))
                                 } else {
@@ -109,7 +109,6 @@ struct SettingsView: View {
             .navigationBarTitleDisplayMode(.large)
             .navigationDestination(isPresented: $isNavigatingToFocusSettings) {
                 FocusSettingsView()
-                    .environmentObject(selectionStore)
             }
         }
     }

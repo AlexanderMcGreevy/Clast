@@ -1,16 +1,51 @@
 import SwiftUI
 
 struct SessionCompleteView: View {
-    let duration: Int // in seconds
-    let breaksTaken: Int
-    let completed: Bool
+    let session: SessionData?
+    let onDismiss: (() -> Void)?
+
+    // Legacy support for direct parameters
+    let duration: Int?
+    let breaksTaken: Int?
+    let completed: Bool?
 
     @EnvironmentObject var sessionManager: SessionManager
     @Environment(\.dismiss) private var dismiss
 
+    // Convenience initializer for session object (preferred)
+    init(session: SessionData, onDismiss: (() -> Void)? = nil) {
+        self.session = session
+        self.onDismiss = onDismiss
+        self.duration = nil
+        self.breaksTaken = nil
+        self.completed = nil
+    }
+
+    // Legacy initializer for direct parameters
+    init(duration: Int, breaksTaken: Int, completed: Bool) {
+        self.session = nil
+        self.onDismiss = nil
+        self.duration = duration
+        self.breaksTaken = breaksTaken
+        self.completed = completed
+    }
+
+    // Computed properties to handle both init methods
+    private var sessionDuration: Int {
+        session?.duration ?? duration ?? 0
+    }
+
+    private var sessionBreaksTaken: Int {
+        session?.breaksTaken ?? breaksTaken ?? 0
+    }
+
+    private var sessionCompleted: Bool {
+        session?.completed ?? completed ?? false
+    }
+
     var durationString: String {
-        let hours = duration / 3600
-        let minutes = (duration % 3600) / 60
+        let hours = sessionDuration / 3600
+        let minutes = (sessionDuration % 3600) / 60
 
         if hours > 0 {
             return "\(hours)h \(minutes)m"
@@ -29,7 +64,7 @@ struct SessionCompleteView: View {
 
                 // Success/Failure Icon
                 VStack(spacing: 24) {
-                    if completed {
+                    if sessionCompleted {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.system(size: 100))
                             .foregroundStyle(
@@ -52,11 +87,11 @@ struct SessionCompleteView: View {
                     }
 
                     VStack(spacing: 12) {
-                        Text(completed ? "Session Complete!" : "Session Incomplete")
+                        Text(sessionCompleted ? "Session Complete!" : "Session Incomplete")
                             .font(.system(size: 40, weight: .bold, design: .rounded))
                             .foregroundColor(.white)
 
-                        Text(completed ? "Great work staying focused." : "Better luck next time.")
+                        Text(sessionCompleted ? "Great work staying focused." : "Better luck next time.")
                             .font(.system(size: 18, weight: .medium))
                             .foregroundColor(.white.opacity(0.7))
                             .multilineTextAlignment(.center)
@@ -68,7 +103,7 @@ struct SessionCompleteView: View {
                 // Stats Display
                 VStack(spacing: 20) {
                     StatRow(icon: "clock.fill", label: "Focus Time", value: durationString)
-                    StatRow(icon: "pause.circle.fill", label: "Breaks Taken", value: "\(breaksTaken)")
+                    StatRow(icon: "pause.circle.fill", label: "Breaks Taken", value: "\(sessionBreaksTaken)")
                     StatRow(icon: "chart.line.uptrend.xyaxis", label: "Success Rate", value: "\(sessionManager.successRate)%")
                 }
                 .padding(24)
@@ -83,8 +118,12 @@ struct SessionCompleteView: View {
                 // Action Buttons
                 VStack(spacing: 16) {
                     Button {
-                        // Return to home
-                        dismiss()
+                        // Call custom onDismiss if provided, otherwise use default dismiss
+                        if let onDismiss = onDismiss {
+                            onDismiss()
+                        } else {
+                            dismiss()
+                        }
                     } label: {
                         Text("Done")
                             .font(.system(size: 20, weight: .bold))
@@ -104,12 +143,13 @@ struct SessionCompleteView: View {
         }
         .navigationBarBackButtonHidden(true)
         .onAppear {
-            // Log the session only if it was completed (early termination already logged)
-            if completed {
+            // Only log session if using legacy init (not from pending completion)
+            // Pending completion sessions are already logged in SessionManager
+            if session == nil && sessionCompleted {
                 sessionManager.logSession(
-                    duration: duration,
+                    duration: sessionDuration,
                     completed: true,
-                    breaksTaken: breaksTaken
+                    breaksTaken: sessionBreaksTaken
                 )
             }
         }

@@ -1,9 +1,10 @@
 import SwiftUI
+import FamilyControls
 
 struct FocusHomeView: View {
     @EnvironmentObject var sessionManager: SessionManager
-    @StateObject private var selectionStore = FamilyActivitySelectionStore.shared
-    @StateObject private var focusController = ScreenTimeFocusController.shared
+    @StateObject private var selectionStore = SelectionStore.shared
+    @StateObject private var focusController = FocusController.shared
     
     @State private var selectedHours: Int = 0
     @State private var selectedMinutes: Int = 25
@@ -91,10 +92,10 @@ struct FocusHomeView: View {
                                 // Start Button
                                 Button {
                                     // WIRING POINT: Check authorization and configuration before starting
-                                    if focusController.authorizationState == .denied {
+                                    if focusController.authorizationStatus != .approved {
                                         // Show permission denied alert
                                         showPermissionDeniedAlert = true
-                                    } else if !focusController.hasAnySelectedApps {
+                                    } else if !selectionStore.hasAnySelections {
                                         // Route to settings if no apps selected
                                         isNavigatingToSettings = true
                                     } else {
@@ -136,7 +137,6 @@ struct FocusHomeView: View {
                         }
                         .navigationDestination(isPresented: $isNavigatingToSettings) {
                             FocusSettingsView()
-                                .environmentObject(selectionStore)
                         }
                     }
                 }
@@ -144,6 +144,22 @@ struct FocusHomeView: View {
                 // Permission denied overlay
                 if showPermissionDeniedAlert {
                     PermissionDeniedView(isPresented: $showPermissionDeniedAlert)
+                }
+            }
+            .task {
+                // Refresh authorization status when view appears
+                // This ensures we have the latest status from iOS
+                // Using .task instead of .onAppear ensures this runs before the view is rendered
+                focusController.refreshAuthorizationStatus()
+
+                print("📱 [FocusHomeView] Authorization status: \(focusController.authorizationStatus)")
+                print("📱 [FocusHomeView] Has selections: \(selectionStore.hasAnySelections)")
+            }
+            .onChange(of: focusController.authorizationStatus) { oldStatus, newStatus in
+                // Auto-dismiss permission alert if authorization is granted
+                if newStatus == .approved && showPermissionDeniedAlert {
+                    showPermissionDeniedAlert = false
+                    print("✅ [FocusHomeView] Authorization granted - dismissing permission alert")
                 }
             }
         }

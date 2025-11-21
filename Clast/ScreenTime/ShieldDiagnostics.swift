@@ -27,13 +27,13 @@ class ShieldDiagnostics {
         }
 
         // Check 2: App Selection
-        let store = FamilyActivitySelectionStore.shared
-        print("✓ Has selected apps: \(store.hasAnySelectedApps)")
+        let store = SelectionStore.shared
+        print("✓ Has selected apps: \(store.hasAnySelections)")
         print("   - Applications: \(store.selection.applicationTokens.count)")
         print("   - Categories: \(store.selection.categoryTokens.count)")
         print("   - Web Domains: \(store.selection.webDomainTokens.count)")
 
-        if !store.hasAnySelectedApps {
+        if !store.hasAnySelections {
             print("❌ ERROR: No apps selected for blocking")
             print("   Solution: Configure blocked apps in Focus Settings")
         }
@@ -53,8 +53,8 @@ class ShieldDiagnostics {
         print("✓ ManagedSettings Store Created")
 
         // Check 5: Focus Controller State
-        let focusController = ScreenTimeFocusController.shared
-        print("✓ Focus Active: \(focusController.isFocusActive)")
+        let focusController = FocusController.shared
+        print("✓ Focus Active: \(focusController.isSessionActive)")
 
         // Check 6: Device Type
         #if targetEnvironment(simulator)

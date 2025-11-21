@@ -2,12 +2,18 @@ import Foundation
 
 class ProgressVerificationService {
     static let shared = ProgressVerificationService()
-    
-    private let apiEndpoint = "https://api.anthropic.com/v1/messages"
-    private let model = "claude-sonnet-4-20250514"
-    
-    private init() {}
-    
+
+    // MARK: - Configuration
+    // All configuration is now in APIConfig.swift
+    private var apiEndpoint: String {
+        APIConfig.verificationEndpoint
+    }
+
+    private init() {
+        // Print configuration status on initialization
+        print("📡 [ProgressVerificationService] \(APIConfig.configurationStatus)")
+    }
+
     // MARK: - System Prompt
     
     private let systemPrompt = """
@@ -51,112 +57,79 @@ class ProgressVerificationService {
     """
     
     // MARK: - Main Verification Method
-    
+
     func verifyProgress(
         sessionGoal: String,
         currentSummary: String,
         userNote: String,
         scrapedDelta: String
     ) async throws -> ProgressVerificationResponse {
-        
+
         let request = ProgressVerificationRequest(
             sessionGoal: sessionGoal,
             sessionStateSummary: currentSummary,
             userProgressNote: userNote,
             scrapedTextDelta: scrapedDelta
         )
-        
-        let userMessage = formatUserMessage(request)
-        
-        let response = try await callClaudeAPI(
-            systemPrompt: systemPrompt,
-            userMessage: userMessage
-        )
-        
-        return try parseResponse(response)
+
+        // Call Cloud Run endpoint which handles Gemini API
+        return try await callVerificationAPI(request: request)
     }
     
     // MARK: - API Communication
-    
-    private func callClaudeAPI(systemPrompt: String, userMessage: String) async throws -> String {
+
+    private func callVerificationAPI(request: ProgressVerificationRequest) async throws -> ProgressVerificationResponse {
+        // Validate configuration
+        guard APIConfig.isConfigured else {
+            throw VerificationError.notConfigured
+        }
+
         guard let url = URL(string: apiEndpoint) else {
             throw VerificationError.invalidURL
         }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("2023-06-01", forHTTPHeaderField: "anthropic-version")
-        
-        let requestBody: [String: Any] = [
-            "model": model,
-            "max_tokens": 1024,
-            "system": systemPrompt,
-            "messages": [
-                [
-                    "role": "user",
-                    "content": userMessage
-                ]
-            ]
-        ]
-        
-        request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
-        
-        let (data, response) = try await URLSession.shared.data(for: request)
-        
-        guard let httpResponse = response as? HTTPURLResponse,
-              (200...299).contains(httpResponse.statusCode) else {
-            throw VerificationError.apiError("HTTP error")
+
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "POST"
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        urlRequest.timeoutInterval = APIConfig.timeoutInterval
+
+        // Send request directly to Cloud Run
+        // Cloud Run will handle Gemini API call with its own API key
+        urlRequest.httpBody = try JSONEncoder().encode(request)
+
+        let (data, response) = try await URLSession.shared.data(for: urlRequest)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw VerificationError.apiError("Invalid response")
         }
-        
-        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let content = json["content"] as? [[String: Any]],
-              let firstContent = content.first,
-              let text = firstContent["text"] as? String else {
-            throw VerificationError.invalidResponse
+
+        guard (200...299).contains(httpResponse.statusCode) else {
+            // Try to extract error message from Cloud Run
+            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let errorMessage = json["error"] as? String {
+                throw VerificationError.apiError("Server error: \(errorMessage)")
+            }
+            throw VerificationError.apiError("HTTP \(httpResponse.statusCode)")
         }
-        
-        return text
-    }
-    
-    // MARK: - Message Formatting
-    
-    private func formatUserMessage(_ request: ProgressVerificationRequest) -> String {
-        return """
-        sessionGoal: \(request.sessionGoal)
-        
-        sessionStateSummary: \(request.sessionStateSummary)
-        
-        userProgressNote: \(request.userProgressNote)
-        
-        scrapedTextDelta: \(request.scrapedTextDelta.isEmpty ? "(No new document content)" : request.scrapedTextDelta)
-        """
-    }
-    
-    // MARK: - Response Parsing
-    
-    private func parseResponse(_ responseText: String) throws -> ProgressVerificationResponse {
-        // Strip any potential markdown code blocks
-        let cleaned = responseText
-            .replacingOccurrences(of: "```json", with: "")
-            .replacingOccurrences(of: "```", with: "")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        
-        guard let data = cleaned.data(using: .utf8) else {
-            throw VerificationError.invalidResponse
-        }
-        
+
+        // Parse direct JSON response from Cloud Run
         do {
-            let response = try JSONDecoder().decode(ProgressVerificationResponse.self, from: data)
-            
-            // Validate response
-            guard response.score >= 0.0 && response.score <= 1.0 else {
+            let decoder = JSONDecoder()
+            let apiResponse = try decoder.decode(ProgressVerificationResponse.self, from: data)
+
+            // Validate score range
+            guard apiResponse.score >= 0.0 && apiResponse.score <= 1.0 else {
                 throw VerificationError.invalidScore
             }
-            
-            return response
+
+            return apiResponse
+        } catch let decodingError as DecodingError {
+            print("❌ [ProgressVerificationService] Failed to decode response: \(decodingError)")
+            if let responseString = String(data: data, encoding: .utf8) {
+                print("   Response: \(responseString)")
+            }
+            throw VerificationError.parsingFailed(decodingError)
         } catch {
-            print("Failed to parse Claude response: \(cleaned)")
             throw VerificationError.parsingFailed(error)
         }
     }
@@ -165,14 +138,17 @@ class ProgressVerificationService {
 // MARK: - Error Types
 
 enum VerificationError: LocalizedError {
+    case notConfigured
     case invalidURL
     case apiError(String)
     case invalidResponse
     case invalidScore
     case parsingFailed(Error)
-    
+
     var errorDescription: String? {
         switch self {
+        case .notConfigured:
+            return "API not configured. Please update cloudRunURL in APIConfig.swift with your Cloud Run endpoint."
         case .invalidURL:
             return "Invalid API endpoint"
         case .apiError(let message):
@@ -186,21 +162,3 @@ enum VerificationError: LocalizedError {
         }
     }
 }
-```
-
-## Summary of All Files
-
-### Project Structure:
-```
-Clast/
-├── Models/
-│   ├── ProgressVerificationModels.swift          (ADD)
-│   └── SessionStateManager.swift                 (ADD)
-├── ScreenTime/
-│   ├── ProgressVerificationService.swift         (UPDATE - enhanced prompt)
-│   └── TextRecognitionService.swift              (ADD)
-├── Views/
-│   ├── AIProofGateView.swift                     (REPLACE)
-│   ├── ImagePicker.swift                         (ADD)
-│   ├── RunningSessionView.swift                  (from previous response)
-│   └── SessionGoalInputView.swift                (from previous response)

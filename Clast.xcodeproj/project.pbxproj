@@ -60,14 +60,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		331107792EBBF26C00CED2BC /* Exceptions for "ClastShieldConfiguration" folder in "ClastShieldConfiguration" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-				ShieldConfigurationExtension.swift,
-			);
-			target = 33939A072EB281C80070C29C /* ClastShieldConfiguration */;
-		};
 		3311077A2EBBF26C00CED2BC /* Exceptions for "ClastShieldConfiguration" folder in "ClastShieldConfiguration" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -75,6 +67,7 @@
 				Localizable.strings,
 				ShieldActionExtension.swift,
 				ShieldAnalytics.swift,
+				ShieldConfigurationExtension.swift,
 			);
 			target = 33939A072EB281C80070C29C /* ClastShieldConfiguration */;
 		};
@@ -96,18 +89,10 @@
 			path = ClastUITests;
 			sourceTree = "<group>";
 		};
-		339399FF2EB27E0F0070C29C /* ClastShieldConfiguration */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				3311077A2EBBF26C00CED2BC /* Exceptions for "ClastShieldConfiguration" folder in "ClastShieldConfiguration" target */,
-			);
-			path = ClastShieldConfiguration;
-			sourceTree = "<group>";
-		};
 		33939A0E2EB281C80070C29C /* ClastShieldConfiguration */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				331107792EBBF26C00CED2BC /* Exceptions for "ClastShieldConfiguration" folder in "ClastShieldConfiguration" target */,
+				3311077A2EBBF26C00CED2BC /* Exceptions for "ClastShieldConfiguration" folder in "ClastShieldConfiguration" target */,
 			);
 			path = ClastShieldConfiguration;
 			sourceTree = "<group>";
@@ -157,7 +142,6 @@
 				33939A0E2EB281C80070C29C /* ClastShieldConfiguration */,
 				33939A092EB281C80070C29C /* Frameworks */,
 				33418D152EAD793C00F2030F /* Products */,
-				339399FF2EB27E0F0070C29C /* ClastShieldConfiguration */,
 			);
 			sourceTree = "<group>";
 		};
@@ -267,7 +251,6 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				339399FF2EB27E0F0070C29C /* ClastShieldConfiguration */,
 				33939A0E2EB281C80070C29C /* ClastShieldConfiguration */,
 			);
 			name = ClastShieldConfiguration;
@@ -540,6 +523,7 @@
 				DEVELOPMENT_TEAM = Z87CXCTTK6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Clast needs access to your photo library to verify your progress during focus sessions. You can take screenshots of your work as proof of productivity.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -573,6 +557,7 @@
 				DEVELOPMENT_TEAM = Z87CXCTTK6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Clast needs access to your photo library to verify your progress during focus sessions. You can take screenshots of your work as proof of productivity.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

@@ -16,7 +16,7 @@ struct ActiveTimerState: Codable {
     }
 }
 
-struct SessionData: Identifiable, Codable {
+struct SessionData: Identifiable, Codable, Equatable {
     let id: UUID
     let date: Date
     let duration: Int // in seconds
@@ -29,6 +29,11 @@ struct SessionData: Identifiable, Codable {
         self.duration = duration
         self.completed = completed
         self.breaksTaken = breaksTaken
+    }
+
+    // Equatable conformance (automatically synthesized by compiler)
+    static func == (lhs: SessionData, rhs: SessionData) -> Bool {
+        lhs.id == rhs.id
     }
 
     var durationString: String {
@@ -59,15 +64,18 @@ struct SessionData: Identifiable, Codable {
 class SessionManager: ObservableObject {
     @Published var sessions: [SessionData] = []
     @Published var activeTimer: ActiveTimerState?
+    @Published var pendingCompletionSession: SessionData? // Session that completed while app was closed
 
     private let storageKey = "clast_sessions"
     private let activeTimerKey = "clast_active_timer"
+    private let pendingCompletionKey = "clast_pending_completion"
 
     // Screen Time controller for app blocking (lazy to avoid simulator/preview crashes)
-    lazy var focusController = ScreenTimeFocusController.shared
+    lazy var focusController = FocusController.shared
 
     init() {
         loadSessions()
+        loadPendingCompletion()
         loadActiveTimer()
     }
 
@@ -120,7 +128,7 @@ class SessionManager: ObservableObject {
         // WIRING POINT: Start Screen Time blocking when timer starts
         // This will block the selected apps for the session duration
         let durationMinutes = duration / 60
-        try await focusController.startFocus(durationMinutes: durationMinutes)
+        try await focusController.startSession(durationMinutes: durationMinutes)
     }
 
     func updateTimerBreaks(breaksTaken: Int) {
@@ -139,7 +147,7 @@ class SessionManager: ObservableObject {
 
         // WIRING POINT: Stop Screen Time blocking when timer ends
         // This will unblock all apps
-        focusController.stopFocus()
+        focusController.endSession()
     }
 
     private func saveActiveTimer() {
@@ -152,13 +160,55 @@ class SessionManager: ObservableObject {
     private func loadActiveTimer() {
         if let data = UserDefaults.standard.data(forKey: activeTimerKey),
            let decoded = try? JSONDecoder().decode(ActiveTimerState.self, from: data) {
-            // Only restore if not expired
-            if !decoded.isExpired {
-                activeTimer = decoded
-            } else {
-                // Timer expired while app was closed - clear it
+            // Check if timer expired while app was closed
+            if decoded.isExpired {
+                // Create completed session
+                let completedSession = SessionData(
+                    duration: decoded.totalDuration,
+                    completed: true,
+                    breaksTaken: decoded.breaksTaken
+                )
+
+                // Save as pending completion to show success screen
+                pendingCompletionSession = completedSession
+                savePendingCompletion()
+
+                // Add to session history
+                addSession(completedSession)
+
+                // Clear the timer
                 UserDefaults.standard.removeObject(forKey: activeTimerKey)
+
+                // Clear shields
+                focusController.endSession()
+
+                print("✅ [SessionManager] Session completed while app was closed")
+            } else {
+                // Restore active timer
+                activeTimer = decoded
             }
         }
     }
+
+    // MARK: - Pending Completion Persistence
+
+    private func savePendingCompletion() {
+        if let session = pendingCompletionSession,
+           let encoded = try? JSONEncoder().encode(session) {
+            UserDefaults.standard.set(encoded, forKey: pendingCompletionKey)
+        }
+    }
+
+    private func loadPendingCompletion() {
+        if let data = UserDefaults.standard.data(forKey: pendingCompletionKey),
+           let decoded = try? JSONDecoder().decode(SessionData.self, from: data) {
+            pendingCompletionSession = decoded
+        }
+    }
+
+    func clearPendingCompletion() {
+        pendingCompletionSession = nil
+        UserDefaults.standard.removeObject(forKey: pendingCompletionKey)
+    }
 }
+

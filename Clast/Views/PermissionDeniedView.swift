@@ -1,7 +1,9 @@
 import SwiftUI
+import FamilyControls
 
 struct PermissionDeniedView: View {
     @Binding var isPresented: Bool
+    @StateObject private var focusController = FocusController.shared
 
     var body: some View {
         ZStack {
@@ -36,12 +38,20 @@ struct PermissionDeniedView: View {
                 // Buttons
                 VStack(spacing: 12) {
                     Button {
-                        if let url = URL(string: UIApplication.openSettingsURLString) {
-                            UIApplication.shared.open(url)
+                        Task { @MainActor in
+                            do {
+                                try await focusController.requestAuthorization()
+                                // Authorization granted, close the view
+                                isPresented = false
+                            } catch {
+                                // If it fails, open settings
+                                if let url = URL(string: UIApplication.openSettingsURLString) {
+                                    await UIApplication.shared.open(url)
+                                }
+                            }
                         }
-                        isPresented = false
                     } label: {
-                        Text("Open Settings")
+                        Text("Grant Permission")
                             .font(.system(size: 18, weight: .bold))
                             .foregroundColor(.black)
                             .frame(maxWidth: .infinity)
@@ -53,17 +63,25 @@ struct PermissionDeniedView: View {
                     }
 
                     Button {
+                        if let url = URL(string: UIApplication.openSettingsURLString) {
+                            UIApplication.shared.open(url)
+                        }
+                    } label: {
+                        Text("Open Settings")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.white.opacity(0.8))
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 50)
+                    }
+
+                    Button {
                         isPresented = false
                     } label: {
                         Text("Cancel")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.white.opacity(0.6))
                             .frame(maxWidth: .infinity)
-                            .frame(height: 54)
-                            .background(
-                                RoundedRectangle(cornerRadius: 27)
-                                    .stroke(.white.opacity(0.5), lineWidth: 2)
-                            )
+                            .frame(height: 50)
                     }
                 }
             }

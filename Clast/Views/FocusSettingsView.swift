@@ -2,7 +2,7 @@ import SwiftUI
 import FamilyControls
 
 struct FocusSettingsView: View {
-    @EnvironmentObject var selectionStore: FamilyActivitySelectionStore
+    @StateObject private var selectionStore = SelectionStore.shared
     @Environment(\.dismiss) private var dismiss
 
     @State private var isPickerPresented = false
@@ -43,8 +43,8 @@ struct FocusSettingsView: View {
                                 .font(.system(size: 14, weight: .semibold))
                                 .foregroundColor(.white.opacity(0.8))
 
-                            if selectionStore.hasAnySelectedApps {
-                                Text("\(selectionStore.selectedItemCount) apps selected")
+                            if selectionStore.hasAnySelections {
+                                Text("\(selectionStore.totalSelectionCount) apps selected")
                                     .font(.system(size: 18, weight: .bold))
                                     .foregroundColor(.white)
                             } else {
@@ -56,9 +56,9 @@ struct FocusSettingsView: View {
 
                         Spacer()
 
-                        Image(systemName: selectionStore.hasAnySelectedApps ? "checkmark.circle.fill" : "circle")
+                        Image(systemName: selectionStore.hasAnySelections ? "checkmark.circle.fill" : "circle")
                             .font(.system(size: 32))
-                            .foregroundColor(selectionStore.hasAnySelectedApps ? .green : .white.opacity(0.3))
+                            .foregroundColor(selectionStore.hasAnySelections ? .green : .white.opacity(0.3))
                     }
                     .padding(20)
                     .background(
@@ -99,8 +99,8 @@ struct FocusSettingsView: View {
                                     .stroke(.white, lineWidth: 2)
                             )
                     }
-                    .disabled(!selectionStore.hasAnySelectedApps)
-                    .opacity(selectionStore.hasAnySelectedApps ? 1.0 : 0.5)
+                    .disabled(!selectionStore.hasAnySelections)
+                    .opacity(selectionStore.hasAnySelections ? 1.0 : 0.5)
                 }
                 .padding(.horizontal, 40)
 
@@ -123,6 +123,5 @@ struct FocusSettingsView: View {
 
 #Preview {
     FocusSettingsView()
-        .environmentObject(FamilyActivitySelectionStore.shared)
         .preferredColorScheme(.dark)
 }

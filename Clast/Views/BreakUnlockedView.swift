@@ -1,6 +1,9 @@
 import SwiftUI
+import Combine
 
 struct BreakUnlockedView: View {
+    let maxBreakDuration: Int // Maximum earned duration in seconds
+    let score: Double // Score 0.0-1.0
     let timeRemaining: Int?
     let onReturnToSession: (() -> Void)?
     let onBreakTaken: (() -> Void)?
@@ -8,12 +11,46 @@ struct BreakUnlockedView: View {
 
     @Environment(\.dismiss) private var dismiss
     @State private var showEndSessionAlert = false
+    @State private var selectedBreakMinutes: Int
+    @State private var breakTimeRemaining: Int
+    @State private var isBreakActive = false
 
-    init(timeRemaining: Int? = nil, onReturnToSession: (() -> Void)? = nil, onBreakTaken: (() -> Void)? = nil, onEndEarly: (() -> Void)? = nil) {
+    init(
+        breakDuration: Int = 300, // Default 5 minutes (for backwards compatibility)
+        score: Double = 0.75,
+        timeRemaining: Int? = nil,
+        onReturnToSession: (() -> Void)? = nil,
+        onBreakTaken: (() -> Void)? = nil,
+        onEndEarly: (() -> Void)? = nil
+    ) {
+        self.maxBreakDuration = breakDuration
+        self.score = score
         self.timeRemaining = timeRemaining
         self.onReturnToSession = onReturnToSession
         self.onBreakTaken = onBreakTaken
         self.onEndEarly = onEndEarly
+
+        // Initialize selected break to max earned time (capped at available minutes)
+        let maxMinutes = breakDuration / 60
+        self._selectedBreakMinutes = State(initialValue: maxMinutes)
+        self._breakTimeRemaining = State(initialValue: breakDuration)
+    }
+
+    /// Calculate maximum break time based on score (0-100% → 0-30 minutes)
+    static func calculateMaxBreakTime(score: Double) -> Int {
+        let percentage = max(0.0, min(1.0, score)) // Clamp 0-1
+        let maxMinutes = Int(percentage * 30.0) // Scale to 0-30 minutes
+        return maxMinutes * 60 // Convert to seconds
+    }
+
+    var breakDurationFormatted: String {
+        let minutes = breakTimeRemaining / 60
+        let seconds = breakTimeRemaining % 60
+        return String(format: "%d:%02d", minutes, seconds)
+    }
+
+    var scorePercentage: Int {
+        Int(score * 100)
     }
 
     var body: some View {
@@ -41,6 +78,10 @@ struct BreakUnlockedView: View {
                             .font(.system(size: 40, weight: .bold, design: .rounded))
                             .foregroundColor(.white)
 
+                        Text("Score: \(scorePercentage)%")
+                            .font(.system(size: 20, weight: .semibold, design: .rounded))
+                            .foregroundColor(.yellow)
+
                         Text("You've earned a well-deserved break.")
                             .font(.system(size: 18, weight: .medium))
                             .foregroundColor(.white.opacity(0.7))
@@ -50,16 +91,17 @@ struct BreakUnlockedView: View {
 
                 Spacer()
 
-                // Break Duration (simulated)
+                // Break Duration
                 VStack(spacing: 12) {
-                    Text("Break Time")
+                    Text(isBreakActive ? "Time Remaining" : "Break Time Earned")
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(.white.opacity(0.8))
 
-                    Text("5:00")
+                    Text(breakDurationFormatted)
                         .font(.system(size: 48, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .foregroundColor(isBreakActive ? .green : .white)
                         .monospacedDigit()
+                        .animation(.easeInOut, value: breakTimeRemaining)
                 }
                 .padding(24)
                 .background(
@@ -71,25 +113,41 @@ struct BreakUnlockedView: View {
 
                 // Action Buttons
                 VStack(spacing: 16) {
-                    Button {
-                        // Increment break counter and start break timer (placeholder for now)
-                        onBreakTaken?()
-                    } label: {
-                        Text("Take a Break")
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.black)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 60)
-                            .background(
-                                RoundedRectangle(cornerRadius: 30)
-                                    .fill(
-                                        .linearGradient(
-                                            colors: [.yellow, .orange],
-                                            startPoint: .leading,
-                                            endPoint: .trailing
+                    if isBreakActive {
+                        Button {
+                            // End break early
+                            stopBreak()
+                        } label: {
+                            Text("End Break Early")
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 60)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 30)
+                                        .stroke(.white, lineWidth: 2)
+                                )
+                        }
+                    } else {
+                        Button {
+                            startBreak()
+                        } label: {
+                            Text("Start Break")
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundColor(.black)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 60)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 30)
+                                        .fill(
+                                            .linearGradient(
+                                                colors: [.yellow, .orange],
+                                                startPoint: .leading,
+                                                endPoint: .trailing
+                                            )
                                         )
-                                    )
-                            )
+                                )
+                        }
                     }
 
                     Button {
@@ -136,6 +194,27 @@ struct BreakUnlockedView: View {
                 }
             }
         }
+        .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
+            if isBreakActive && breakTimeRemaining > 0 {
+                breakTimeRemaining -= 1
+                if breakTimeRemaining == 0 {
+                    stopBreak()
+                }
+            }
+        }
+    }
+
+    // MARK: - Break Timer Functions
+
+    private func startBreak() {
+        isBreakActive = true
+        onBreakTaken?()
+    }
+
+    private func stopBreak() {
+        isBreakActive = false
+        onReturnToSession?()
+        dismiss()
     }
 }
 

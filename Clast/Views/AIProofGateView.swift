@@ -35,6 +35,9 @@ struct AIProofGateView: View {
         ZStack {
             Color.black
                 .ignoresSafeArea()
+                .onTapGesture {
+                    isTextFieldFocused = false
+                }
 
             ScrollView {
                 VStack(spacing: 30) {
@@ -239,12 +242,16 @@ struct AIProofGateView: View {
             Text(errorMessage)
         }
         .navigationDestination(isPresented: $isNavigatingToBreak) {
-            BreakUnlockedView(
-                timeRemaining: timeRemaining,
-                onReturnToSession: onReturnToSession,
-                onBreakTaken: onBreakTaken,
-                onEndEarly: onEndEarly
-            )
+            if let result = verificationResult {
+                BreakUnlockedView(
+                    breakDuration: result.breakDuration,
+                    score: result.score,
+                    timeRemaining: timeRemaining,
+                    onReturnToSession: onReturnToSession,
+                    onBreakTaken: onBreakTaken,
+                    onEndEarly: onEndEarly
+                )
+            }
         }
     }
     
