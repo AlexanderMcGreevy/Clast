@@ -114,13 +114,39 @@ class ProgressVerificationService {
 
         // Parse direct JSON response from Cloud Run
         do {
-            let decoder = JSONDecoder()
-            let apiResponse = try decoder.decode(ProgressVerificationResponse.self, from: data)
+            // First decode to a temporary structure to handle both formats
+            let rawResponse = try JSONSerialization.jsonObject(with: data) as? [String: Any]
 
-            // Validate score range
-            guard apiResponse.score >= 0.0 && apiResponse.score <= 1.0 else {
+            guard let rawResponse = rawResponse,
+                  let rawScore = rawResponse["score"] as? Double,
+                  let allowBreak = rawResponse["allowBreak"] as? Bool,
+                  let reason = rawResponse["reason"] as? String,
+                  let updatedSummary = rawResponse["updatedSummary"] as? String else {
+                throw VerificationError.invalidResponse
+            }
+
+            // Convert score to 0.0-1.0 range if it's 0-100
+            let normalizedScore: Double
+            if rawScore > 1.0 {
+                // Score is 0-100, convert to 0.0-1.0
+                normalizedScore = rawScore / 100.0
+                print("📊 [ProgressVerificationService] Converted score from \(rawScore) to \(normalizedScore)")
+            } else {
+                // Score is already 0.0-1.0
+                normalizedScore = rawScore
+            }
+
+            // Validate normalized score range
+            guard normalizedScore >= 0.0 && normalizedScore <= 1.0 else {
                 throw VerificationError.invalidScore
             }
+
+            let apiResponse = ProgressVerificationResponse(
+                score: normalizedScore,
+                allowBreak: allowBreak,
+                reason: reason,
+                updatedSummary: updatedSummary
+            )
 
             return apiResponse
         } catch let decodingError as DecodingError {

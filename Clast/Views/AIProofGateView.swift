@@ -11,6 +11,7 @@ struct AIProofGateView: View {
     let timeRemaining: Int
     let onReturnToSession: () -> Void
     let onBreakTaken: () -> Void
+    let onBreakStarted: ((Int) -> Void)? // Callback with break duration in seconds
     let onEndEarly: () -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -249,6 +250,7 @@ struct AIProofGateView: View {
                     timeRemaining: timeRemaining,
                     onReturnToSession: onReturnToSession,
                     onBreakTaken: onBreakTaken,
+                    onBreakStarted: onBreakStarted,
                     onEndEarly: onEndEarly
                 )
             }
@@ -387,6 +389,7 @@ struct ResultDisplayView: View {
         timeRemaining: 900,
         onReturnToSession: {},
         onBreakTaken: {},
+        onBreakStarted: { _ in },
         onEndEarly: {}
     )
     .preferredColorScheme(.dark)

@@ -25,21 +25,14 @@ struct ProgressVerificationResponse: Codable {
     let updatedSummary: String
 
     /// Calculate break duration in seconds based on score
+    /// Score range: 0.0-1.0 (0-100%) maps to 0-30 minutes
     var breakDuration: Int {
         guard allowBreak else { return 0 }
 
-        switch score {
-        case 0.0..<0.6:
-            return 0 // No break earned
-        case 0.6..<0.7:
-            return 3 * 60 // 3 minutes
-        case 0.7..<0.85:
-            return 5 * 60 // 5 minutes
-        case 0.85...1.0:
-            return 10 * 60 // 10 minutes
-        default:
-            return 5 * 60 // Default 5 minutes
-        }
+        // Linear scaling: 0-100% → 0-30 minutes
+        let percentage = max(0.0, min(1.0, score)) // Clamp to 0-1
+        let maxMinutes = Int(percentage * 30.0) // Scale to 0-30 minutes
+        return maxMinutes * 60 // Convert to seconds
     }
 
     /// Formatted break duration string (e.g., "5:00")

@@ -7,6 +7,7 @@ struct BreakUnlockedView: View {
     let timeRemaining: Int?
     let onReturnToSession: (() -> Void)?
     let onBreakTaken: (() -> Void)?
+    let onBreakStarted: ((Int) -> Void)? // Callback with selected break duration in seconds
     let onEndEarly: (() -> Void)?
 
     @Environment(\.dismiss) private var dismiss
@@ -21,6 +22,7 @@ struct BreakUnlockedView: View {
         timeRemaining: Int? = nil,
         onReturnToSession: (() -> Void)? = nil,
         onBreakTaken: (() -> Void)? = nil,
+        onBreakStarted: ((Int) -> Void)? = nil,
         onEndEarly: (() -> Void)? = nil
     ) {
         self.maxBreakDuration = breakDuration
@@ -28,6 +30,7 @@ struct BreakUnlockedView: View {
         self.timeRemaining = timeRemaining
         self.onReturnToSession = onReturnToSession
         self.onBreakTaken = onBreakTaken
+        self.onBreakStarted = onBreakStarted
         self.onEndEarly = onEndEarly
 
         // Initialize selected break to max earned time (capped at available minutes)
@@ -39,7 +42,7 @@ struct BreakUnlockedView: View {
     /// Calculate maximum break time based on score (0-100% → 0-30 minutes)
     static func calculateMaxBreakTime(score: Double) -> Int {
         let percentage = max(0.0, min(1.0, score)) // Clamp 0-1
-        let maxMinutes = Int(percentage * 30.0) // Scale to 0-30 minutes
+        let maxMinutes = Int(percentage * 25.0) // Scale to 0-30 minutes
         return maxMinutes * 60 // Convert to seconds
     }
 
@@ -51,6 +54,15 @@ struct BreakUnlockedView: View {
 
     var scorePercentage: Int {
         Int(score * 100)
+    }
+
+    var maxBreakMinutes: Int {
+        maxBreakDuration / 60
+    }
+
+    var availableMinutes: [Int] {
+        guard maxBreakMinutes > 0 else { return [0] }
+        return Array(1...maxBreakMinutes)
     }
 
     var body: some View {
@@ -82,7 +94,7 @@ struct BreakUnlockedView: View {
                             .font(.system(size: 20, weight: .semibold, design: .rounded))
                             .foregroundColor(.yellow)
 
-                        Text("You've earned a well-deserved break.")
+                        Text("You've earned up to \(maxBreakMinutes) minute\(maxBreakMinutes == 1 ? "" : "s")")
                             .font(.system(size: 18, weight: .medium))
                             .foregroundColor(.white.opacity(0.7))
                             .multilineTextAlignment(.center)
@@ -91,23 +103,54 @@ struct BreakUnlockedView: View {
 
                 Spacer()
 
-                // Break Duration
-                VStack(spacing: 12) {
-                    Text(isBreakActive ? "Time Remaining" : "Break Time Earned")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.white.opacity(0.8))
+                // Break Duration Display or Picker
+                if isBreakActive {
+                    // Show countdown timer during break
+                    VStack(spacing: 12) {
+                        Text("Time Remaining")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.white.opacity(0.8))
 
-                    Text(breakDurationFormatted)
-                        .font(.system(size: 48, weight: .bold, design: .rounded))
-                        .foregroundColor(isBreakActive ? .green : .white)
-                        .monospacedDigit()
-                        .animation(.easeInOut, value: breakTimeRemaining)
+                        Text(breakDurationFormatted)
+                            .font(.system(size: 48, weight: .bold, design: .rounded))
+                            .foregroundColor(.green)
+                            .monospacedDigit()
+                            .animation(.easeInOut, value: breakTimeRemaining)
+                    }
+                    .padding(24)
+                    .background(
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(.ultraThinMaterial)
+                    )
+                } else {
+                    // Show picker to select break duration
+                    VStack(spacing: 16) {
+                        Text("Choose Your Break Duration")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.white.opacity(0.8))
+
+                        HStack(spacing: 0) {
+                            Picker("Minutes", selection: $selectedBreakMinutes) {
+                                ForEach(availableMinutes, id: \.self) { minute in
+                                    Text("\(minute)")
+                                        .tag(minute)
+                                }
+                            }
+                            .pickerStyle(.wheel)
+                            .frame(width: 80)
+
+                            Text("min")
+                                .font(.system(size: 24, weight: .semibold))
+                                .foregroundColor(.white)
+                                .frame(width: 60)
+                        }
+                        .frame(height: 150)
+                        .background(
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(.ultraThinMaterial)
+                        )
+                    }
                 }
-                .padding(24)
-                .background(
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(.ultraThinMaterial)
-                )
 
                 Spacer()
 
@@ -207,8 +250,18 @@ struct BreakUnlockedView: View {
     // MARK: - Break Timer Functions
 
     private func startBreak() {
+        // Set break time to selected duration (convert minutes to seconds)
+        let durationInSeconds = selectedBreakMinutes * 60
+        breakTimeRemaining = durationInSeconds
         isBreakActive = true
+
+        // Call callbacks
         onBreakTaken?()
+        onBreakStarted?(durationInSeconds)
+
+        // Dismiss this view and return to session
+        onReturnToSession?()
+        dismiss()
     }
 
     private func stopBreak() {

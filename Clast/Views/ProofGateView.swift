@@ -167,6 +167,7 @@ struct ProofGateView: View {
                 timeRemaining: timeRemaining,
                 onReturnToSession: onReturnToSession,
                 onBreakTaken: onBreakTaken,
+                onBreakStarted: nil, // ProofGateView doesn't use this feature
                 onEndEarly: onEndEarly
             )
         }
